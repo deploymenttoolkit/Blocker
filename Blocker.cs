@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -8,6 +9,8 @@ namespace DeploymentToolkit.Blocker
 {
     public partial class Blocker : Form
     {
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
+
         private bool _allowClose = false;
 
         private byte _step;
@@ -15,7 +18,11 @@ namespace DeploymentToolkit.Blocker
 
         public Blocker()
         {
+            _logger.Trace("Blocker initializing...");
+
             InitializeComponent();
+
+            _logger.Trace("Setting blocker settings...");
 
             this.FormBorderStyle = FormBorderStyle.None;
 
@@ -23,38 +30,64 @@ namespace DeploymentToolkit.Blocker
             this.FormClosing += Blocker_Closing;
 
             // Needed for transparency to work
+            _logger.Trace("Switching parents...");
             this.PictureLogo.Parent = this.PictureBackground;
             this.LabelInstallation.Parent = this.PictureBackground;
 
             if (File.Exists("Logo.png"))
             {
-                this.PictureLogo.Image = Image.FromFile("Logo.png");
-                this.PictureLogo.SizeMode = PictureBoxSizeMode.Zoom;
+                _logger.Trace("Custom logo found. Creating logo...");
+                try
+                {
+                    this.PictureLogo.Image = Image.FromFile("Logo.png");
+                    this.PictureLogo.SizeMode = PictureBoxSizeMode.Zoom;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Failed to create logo");
+                }
             }
 
             if(File.Exists("Background.png"))
             {
-                this.PictureBackground.Image = Image.FromFile("Background.png");
-                this.PictureBackground.SizeMode = PictureBoxSizeMode.StretchImage;
+                _logger.Trace("Custom background found. Creating background...");
+                try
+                {
+                    this.PictureBackground.Image = Image.FromFile("Background.png");
+                    this.PictureBackground.SizeMode = PictureBoxSizeMode.StretchImage;
+                }
+                catch(Exception ex)
+                {
+                    _logger.Error(ex, "Failed to create background image");
+                }
             }
             else if(!string.IsNullOrEmpty(Program.Settings.BackgroundColor))
             {
+                _logger.Info("Custom background color specified in Settings.xml. Setting colors...");
                 var color = GetColor(Program.Settings.BackgroundColor);
                 if (color != default(Color))
                     this.PictureBackground.BackColor = color;
+                else
+                    _logger.Warn($"Unknown color specified ({Program.Settings.BackgroundColor})");
             }
 
             if(!string.IsNullOrEmpty(Program.Settings.ForegroundColor))
             {
+                _logger.Info("Custom foreground color specified in Settings.xml. Setting colors...");
                 var color = GetColor(Program.Settings.ForegroundColor);
                 if (color != default(Color))
                     this.LabelInstallation.ForeColor = color;
+                else
+                    _logger.Warn($"Unknown color specified ({Program.Settings.BackgroundColor})");
             }
 
+            _logger.Info("Creating and starting timer...");
             _timer = new Timer();
             _timer.Interval = 1000;
             _timer.Tick += Tick;
             _timer.Start();
+
+            _logger.Info("Blocker successfully initialized");
         }
 
         private void Tick(object sender, EventArgs e)
@@ -77,6 +110,7 @@ namespace DeploymentToolkit.Blocker
             //Closing over key should only be possible in debug mode
             if (e.KeyCode == Keys.Q)
             {
+                _logger.Warn("Closing allowed because of DEBUG build");
                 _allowClose = true;
                 this.Close();
             }
@@ -85,13 +119,16 @@ namespace DeploymentToolkit.Blocker
 
         private void Blocker_Closing(object sender, FormClosingEventArgs e)
         {
-            if(!_allowClose)
+            if (!_allowClose)
+            {
+                _logger.Trace("User tried to close application. Preventing...");
                 e.Cancel = true;
+            }
         }
 
         private Color GetColor(string color)
         {
-            Color result = default(Color);
+            var result = default(Color);
             try
             {
                 if (color.StartsWith("#"))
@@ -103,7 +140,10 @@ namespace DeploymentToolkit.Blocker
                     result = Color.FromName(color);
                 }
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"Failed to parse color ({color})");
+            }
             return result;
         }
     }
