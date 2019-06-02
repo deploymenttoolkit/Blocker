@@ -77,7 +77,7 @@ namespace DeploymentToolkit.Blocker
             _logger.Trace($"Detected {screens.Length} monitors");
             foreach (var screen in screens)
             {
-                _logger.Info($"Creating blocker fro {screen.DeviceName} with size {screen.Bounds.Width}x{screen.Bounds.Height}");
+                _logger.Info($"Creating blocker for {screen.DeviceName} with size {screen.Bounds.Width}x{screen.Bounds.Height}");
                 var blocker = new Blocker
                 {
                     Size = screen.WorkingArea.Size

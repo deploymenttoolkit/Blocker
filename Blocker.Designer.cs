@@ -44,7 +44,7 @@
             this.LabelInstallation.Name = "LabelInstallation";
             this.LabelInstallation.Size = new System.Drawing.Size(800, 461);
             this.LabelInstallation.TabIndex = 0;
-            this.LabelInstallation.Text = "Installation running...";
+            this.LabelInstallation.Text = "Installation running\n";
             this.LabelInstallation.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.LabelInstallation.UseWaitCursor = true;
             // 
@@ -59,6 +59,7 @@
             this.PictureLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.PictureLogo.TabIndex = 1;
             this.PictureLogo.TabStop = false;
+            this.PictureLogo.UseWaitCursor = true;
             // 
             // PictureBackground
             // 
@@ -71,6 +72,7 @@
             this.PictureBackground.Size = new System.Drawing.Size(800, 461);
             this.PictureBackground.TabIndex = 2;
             this.PictureBackground.TabStop = false;
+            this.PictureBackground.UseWaitCursor = true;
             // 
             // Blocker
             // 

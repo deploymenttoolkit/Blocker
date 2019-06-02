@@ -82,8 +82,10 @@ namespace DeploymentToolkit.Blocker
             }
 
             _logger.Info("Creating and starting timer...");
-            _timer = new Timer();
-            _timer.Interval = 1000;
+            _timer = new Timer
+            {
+                Interval = 1000
+            };
             _timer.Tick += Tick;
             _timer.Start();
 
@@ -92,7 +94,7 @@ namespace DeploymentToolkit.Blocker
 
         private void Tick(object sender, EventArgs e)
         {
-            var text = new StringBuilder("Installation running");
+            var text = new StringBuilder("Installation running\n");
             for (var i = 0; i < _step; i++)
             {
                 text.Append(".");
