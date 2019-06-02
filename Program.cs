@@ -47,7 +47,7 @@ namespace DeploymentToolkit.Blocker
         {
             try
             {
-                Logging.LogManager.Initialize();
+                Logging.LogManager.Initialize("Blocker");
             }
             catch(Exception ex)
             {
