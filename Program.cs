@@ -1,11 +1,10 @@
-﻿using NLog;
+﻿using DeploymentToolkit.Modals.Settings;
+using NLog;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using System.Xml.Serialization;
 
 namespace DeploymentToolkit.Blocker
 {
@@ -15,7 +14,7 @@ namespace DeploymentToolkit.Blocker
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
-        internal static Settings Settings = new Settings();
+        internal static BlockerSettings Settings;
 
         private static string _namespace;
         internal static string Namespace
@@ -49,7 +48,7 @@ namespace DeploymentToolkit.Blocker
             {
                 Logging.LogManager.Initialize("Blocker");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("Failed to initialize logger");
                 Console.WriteLine(ex);
@@ -66,8 +65,7 @@ namespace DeploymentToolkit.Blocker
 
 
             _logger.Trace("Reading settings from settings file");
-            ReadSettings();
-            _logger.Trace("Read settings");
+            Settings = ToolkitEnvironment.Settings.GetBlockerSettings();
 
             _logger.Trace("Enabling visuals");
             Application.EnableVisualStyles();
@@ -89,30 +87,6 @@ namespace DeploymentToolkit.Blocker
 
             _logger.Trace("Starting all blockers");
             Application.Run(new FormContext(_blockers.ToArray()));
-        }
-
-        private static void ReadSettings()
-        {
-            try
-            {
-                if (!File.Exists("Settings.xml"))
-                {
-                    _logger.Info("No settings.xml found. Using default values");
-                    return;
-                }
-
-                var xml = File.ReadAllText("Settings.xml");
-                var serializer = new XmlSerializer(typeof(Settings));
-                using (var stringReader = new StringReader(xml))
-                {
-                    Settings = (Settings)serializer.Deserialize(stringReader);
-                }
-                _logger.Info("Successfuly read settings from Settings.xml");
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Failed to read settings from settings.xml. Using default values");
-            }
         }
     }
 }
